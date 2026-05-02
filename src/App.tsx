@@ -58,16 +58,18 @@ export function App() {
               <p className="note">Мы не заменяем юриста — мы ускоряем подготовительную работу.</p>
               <a className="btn" href="#request">Обсудить задачу</a>
             </div>
-            <div className="card hero-card">
-              <h3>Что вы получаете</h3>
-              <ul>
-                <li>Понятные и внедряемые сценарии автоматизации без сложной разработки</li>
-                <li>Ускорение повторяющихся юридических и операционных процессов</li>
-                <li>Структуру работы: от диагностики до передачи готового решения</li>
-              </ul>
-            </div>
-            <div className="hero-illustration" aria-hidden="true">
-              <img src="/images/hero-abstract.jpg" alt="" loading="lazy" />
+            <div className="hero-right">
+              <div className="card hero-card">
+                <h3>Что вы получаете</h3>
+                <ul>
+                  <li>Понятные и внедряемые сценарии автоматизации без сложной разработки</li>
+                  <li>Ускорение повторяющихся юридических и операционных процессов</li>
+                  <li>Структуру работы: от диагностики до передачи готового решения</li>
+                </ul>
+              </div>
+              <div className="hero-illustration" aria-hidden="true">
+                <img src="/images/hero-abstract.jpg" alt="" loading="lazy" />
+              </div>
             </div>
           </div>
         </section>
