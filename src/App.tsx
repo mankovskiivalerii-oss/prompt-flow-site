@@ -1,6 +1,6 @@
 import './index.css'
 
-function App() {
+export function App() {
   return (
     <div className="page">
       <header className="header" id="top">
