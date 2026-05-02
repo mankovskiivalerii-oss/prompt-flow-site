@@ -36,7 +36,7 @@ export function App() {
       <header className="header" id="top">
         <div className="container header-inner">
           <div className="brand" aria-label="Prompt Flow">
-            <span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M6 9h10v4H10v5h8v4H6V9Zm20 0h-6l-4 7 4 7h6v-4h-4.2L19 16l2.8-3H26V9Z" /></svg></span>
+            <span className="brand-mark" aria-hidden="true"><img src="/Логотип.png" alt="" loading="eager" /></span>
             <span className="brand-text">Prompt Flow</span>
           </div>
           <nav className="nav">
@@ -67,27 +67,7 @@ export function App() {
               </ul>
             </div>
             <div className="hero-illustration" aria-hidden="true">
-              <svg viewBox="0 0 420 240">
-                <rect x="12" y="24" width="130" height="68" rx="10" className="node" />
-                <rect x="160" y="24" width="120" height="48" rx="10" className="node" />
-                <rect x="300" y="20" width="110" height="80" rx="10" className="node" />
-                <rect x="32" y="122" width="168" height="92" rx="10" className="node" />
-                <rect x="222" y="128" width="188" height="84" rx="10" className="node" />
-                <path d="M142 58h18m120 0h20m-216 110h18m98-14h22" className="flow" />
-                <circle cx="160" cy="58" r="4" className="dot" />
-                <circle cx="300" cy="58" r="4" className="dot" />
-                <circle cx="222" cy="154" r="4" className="dot" />
-                <g className="bars">
-                  <rect x="44" y="138" width="96" height="10" rx="4" />
-                  <rect x="44" y="154" width="72" height="10" rx="4" />
-                  <rect x="44" y="170" width="132" height="10" rx="4" />
-                  <rect x="176" y="40" width="88" height="8" rx="4" />
-                  <rect x="316" y="38" width="78" height="8" rx="4" />
-                  <rect x="316" y="54" width="64" height="8" rx="4" />
-                  <rect x="234" y="144" width="100" height="10" rx="4" />
-                  <rect x="234" y="162" width="150" height="10" rx="4" />
-                </g>
-              </svg>
+              <img src="/Абстракция.png" alt="" loading="lazy" />
             </div>
           </div>
         </section>
