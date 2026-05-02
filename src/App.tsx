@@ -36,7 +36,7 @@ export function App() {
       <header className="header" id="top">
         <div className="container header-inner">
           <div className="brand" aria-label="Prompt Flow">
-            <span className="brand-mark" aria-hidden="true"><img src="/Логотип.png" alt="" loading="eager" /></span>
+            <span className="brand-mark" aria-hidden="true"><img src="/images/prompt-flow-logo.png" alt="" loading="eager" /></span>
             <span className="brand-text">Prompt Flow</span>
           </div>
           <nav className="nav">
@@ -67,7 +67,7 @@ export function App() {
               </ul>
             </div>
             <div className="hero-illustration" aria-hidden="true">
-              <img src="/Абстракция.png" alt="" loading="lazy" />
+              <img src="/images/hero-abstract.jpg" alt="" loading="lazy" />
             </div>
           </div>
         </section>
