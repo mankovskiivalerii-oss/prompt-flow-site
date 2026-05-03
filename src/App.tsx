@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react'
 import './index.css'
 
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xnjwjzkk' // TODO: замените на ваш endpoint Formspree
+const FORM_ENDPOINT = 'https://formspree.io/f/xnjwjzkk'
 
 export function App() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -12,20 +12,33 @@ export function App() {
     setIsSubmitting(true)
     setFormStatus('idle')
 
+    const form = event.currentTarget
+    const formData = new FormData(form)
+
+    formData.set('_subject', 'Новая заявка с сайта Prompt Flow')
+
     try {
-      const formData = new FormData(event.currentTarget)
-      formData.set('_subject', 'Новая заявка с сайта Prompt Flow')
-      const response = await fetch(FORMSPREE_ENDPOINT, {
+      const response = await fetch(FORM_ENDPOINT, {
         method: 'POST',
         headers: { Accept: 'application/json' },
         body: formData,
       })
 
-      if (!response.ok) throw new Error('Ошибка отправки')
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Formspree error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+        })
+
+        throw new Error('Formspree request failed')
+      }
 
       setFormStatus('success')
-      event.currentTarget.reset()
-    } catch {
+      form.reset()
+    } catch (error) {
+      console.error(error)
       setFormStatus('error')
     } finally {
       setIsSubmitting(false)
