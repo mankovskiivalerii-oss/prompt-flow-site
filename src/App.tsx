@@ -2,6 +2,8 @@ import { FormEvent, useState } from 'react'
 import './index.css'
 
 const FORM_ENDPOINT = 'https://formspree.io/f/xnjwjzkk'
+const logoSrc = `${import.meta.env.BASE_URL}images/prompt-flow-logo.png`
+const heroImageSrc = `${import.meta.env.BASE_URL}images/hero-abstract.jpg`
 
 export function App() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -50,7 +52,7 @@ export function App() {
       <header className="header" id="top">
         <div className="container header-inner">
           <div className="brand" aria-label="Prompt Flow">
-            <span className="brand-mark" aria-hidden="true"><img src="/images/prompt-flow-logo.png" alt="" loading="eager" /></span>
+            <span className="brand-mark" aria-hidden="true"><img src={logoSrc} alt="" loading="eager" /></span>
             <span className="brand-text">Prompt Flow</span>
           </div>
           <nav className="nav">
@@ -82,7 +84,7 @@ export function App() {
                 </ul>
               </div>
               <div className="hero-illustration" aria-hidden="true">
-                <img src="/images/hero-abstract.jpg" alt="" loading="lazy" />
+                <img src={heroImageSrc} alt="" loading="lazy" />
               </div>
             </div>
           </div>
