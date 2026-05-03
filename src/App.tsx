@@ -24,7 +24,10 @@ export function App() {
         body: formData,
       })
 
-      if (!response.ok) {
+      if (response.ok) {
+        setFormStatus('success')
+        form.reset()
+      } else {
         const errorText = await response.text()
         console.error('Formspree error:', {
           status: response.status,
@@ -32,11 +35,8 @@ export function App() {
           body: errorText,
         })
 
-        throw new Error('Formspree request failed')
+        setFormStatus('error')
       }
-
-      setFormStatus('success')
-      form.reset()
     } catch (error) {
       console.error(error)
       setFormStatus('error')
