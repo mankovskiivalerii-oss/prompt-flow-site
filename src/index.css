@@ -58,3 +58,5 @@ input:focus,textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0
   .hero-grid,.grid.two,.grid.three { grid-template-columns: 1fr; }
   .hero-right { grid-column: 1; max-width: 420px; }
 }
+
+.form-fallback-contact { margin: 10px 0 0; font-size: 0.875rem; color: #5b6475; }
