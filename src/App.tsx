@@ -26,26 +26,13 @@ export function App() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [screen, setScreen] = useState<Screen>('cases')
-  const pilotLegalCase: CreatedLegalCaseItem = {
-    id: 'a56-95529-2025',
-    number: 'A56-95529/2025',
-    plaintiff: 'ООО «ТЛЦ»',
-    defendant: 'ООО «НафтаТранс»',
-    clientRole: 'ответчик',
-    processType: 'гражданское / арбитражное',
-    category: 'транспортно-экспедиционный спор',
-    status: 'анализ выполнен',
-    documentsCount: 15,
-    risksCount: 5,
-    updatedAt: 'сегодня',
-  }
   const [createdLegalCases, setCreatedLegalCases] = useState<CreatedLegalCaseItem[]>(() => {
     try {
       const raw = localStorage.getItem('legalCases')
       if (!raw) return []
       const parsed = JSON.parse(raw)
       return Array.isArray(parsed)
-        ? parsed.filter((legalCase) => legalCase?.id !== pilotLegalCase.id)
+        ? parsed.filter((legalCase) => legalCase?.id !== 'a56-95529-2025')
         : []
     } catch {
       return []
@@ -60,6 +47,20 @@ export function App() {
     processType: 'гражданское',
     category: '',
   })
+
+  const pilotLegalCase: CreatedLegalCaseItem = {
+    id: 'a56-95529-2025',
+    number: 'A56-95529/2025',
+    plaintiff: 'ООО «ТЛЦ»',
+    defendant: 'ООО «НафтаТранс»',
+    clientRole: 'ответчик',
+    processType: 'гражданское / арбитражное',
+    category: 'транспортно-экспедиционный спор',
+    status: 'анализ выполнен',
+    documentsCount: 15,
+    risksCount: 5,
+    updatedAt: 'сегодня',
+  }
 
   const allLegalCases = [...createdLegalCases, pilotLegalCase]
   const totalCasesCount = allLegalCases.length
@@ -170,21 +171,29 @@ export function App() {
         {screen === 'cases' && (
           <section className="section alt" id="cases">
             <div className="container">
-              <div className="card">
-                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+              <header className="mb-4 rounded-xl border border-slate-200 bg-white p-4" style={{ marginBottom: 16, borderRadius: 14, border: '1px solid #dbe3f1', background: '#fff', padding: 22, boxShadow: '0 8px 24px rgba(15, 23, 42, .06)' }}>
+                <div className="flex flex-wrap items-center justify-between gap-4" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
                   <div>
-                    <p className="eyebrow">Дела</p>
-                    <h2>Дела</h2>
-                    <p>Дело № A56-95529/2025 · Ответчик: ООО «НафтаТранс»</p>
+                    <h2 className="text-xl font-semibold">Дела</h2>
+                    <p className="text-sm text-slate-500">
+                      Дело № А56-95529/2025 · Ответчик: ООО «НафтаТранс»
+                    </p>
+                    <p>Создавайте дела, фиксируйте процессуальный контекст и переходите к рабочим разделам дела.</p>
+                    <button className="btn" type="button" onClick={() => setIsCreateCaseOpen(true)}>Создать дело</button>
                   </div>
-                  <div className="card" style={{ flex: '0 1 160px', padding: 12, background: '#f8fafc' }}>
-                    <p className="eyebrow" style={{ marginBottom: 4 }}>Всего дел</p>
-                    <h3 style={{ margin: 0 }}>{totalCasesCount}</h3>
-                  </div>
+
+                  {screen === 'cases' ? (
+                    <div className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 sm:w-40" style={{ width: '100%', maxWidth: 160, borderRadius: 10, border: '1px solid #e2e8f0', background: '#f8fafc', padding: 12 }}>
+                      <p className="text-xs font-medium uppercase tracking-wide text-slate-500" style={{ marginBottom: 4, fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#64748b' }}>
+                        Всего дел
+                      </p>
+                      <p className="mt-1 text-2xl font-semibold text-slate-900" style={{ margin: 0, fontSize: 28, fontWeight: 700, color: '#0f172a' }}>
+                        {totalCasesCount}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
-                <p>Создавайте дела, фиксируйте процессуальный контекст и переходите к рабочим разделам дела.</p>
-                <button className="btn" type="button" onClick={() => setIsCreateCaseOpen(true)}>Создать дело</button>
-              </div>
+              </header>
 
               {isCreateCaseOpen && (
                 <div className="card" style={{ marginTop: 20 }}>
@@ -207,28 +216,93 @@ export function App() {
 
               <div className="grid two" style={{ marginTop: 20 }}>
                 {allLegalCases.map((legalCase) => (
-                  <article className="card" key={legalCase.id}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12 }}>
-                      <div>
-                        <h3>Дело № {legalCase.number}</h3>
-                        <p>{legalCase.plaintiff} против {legalCase.defendant}</p>
-                        <p><strong>Роль клиента:</strong> {legalCase.clientRole}</p>
+                  <div
+                    key={legalCase.id}
+                    className="w-full rounded-xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md"
+                    style={{ width: '100%', borderRadius: 14, border: '1px solid #dbe3f1', background: '#fff', padding: 22, textAlign: 'left', boxShadow: '0 8px 24px rgba(15, 23, 42, .06)' }}
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-4" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+                      <div className="space-y-1">
+                        <p className="text-base font-semibold text-slate-900" style={{ fontWeight: 700, color: '#0f172a' }}>
+                          Дело № {legalCase.number}
+                        </p>
+                        <p className="text-sm text-slate-700" style={{ color: '#334155' }}>
+                          {legalCase.plaintiff} против {legalCase.defendant}
+                        </p>
+                        <p className="text-sm text-slate-500" style={{ color: '#64748b' }}>
+                          Роль клиента: {legalCase.clientRole}
+                        </p>
                       </div>
-                      <p className="eyebrow">Статус: {legalCase.status}</p>
+
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          legalCase.status === 'анализ выполнен'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-slate-100 text-slate-700'
+                        }`}
+                        style={{ borderRadius: 999, padding: '4px 12px', fontSize: 12, fontWeight: 600, background: legalCase.status === 'анализ выполнен' ? '#d1fae5' : '#f1f5f9', color: legalCase.status === 'анализ выполнен' ? '#047857' : '#334155' }}
+                      >
+                        Статус: {legalCase.status}
+                      </span>
                     </div>
-                    <div className="grid two" style={{ marginTop: 12 }}>
-                      <p><strong>Тип процесса:</strong> {legalCase.processType}</p>
-                      <p><strong>Категория:</strong> {legalCase.category}</p>
-                      <p><strong>Документов:</strong> {legalCase.documentsCount}</p>
-                      <p><strong>Рисков:</strong> {legalCase.risksCount}</p>
-                      <p><strong>Последнее обновление:</strong> {legalCase.updatedAt}</p>
+
+                    <div className="mt-5 grid gap-4 text-sm text-slate-700 sm:grid-cols-2 xl:grid-cols-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16, marginTop: 20, fontSize: 14, color: '#334155' }}>
+                      <p>
+                        <strong>Тип процесса:</strong>
+                        <br />
+                        {legalCase.processType}
+                      </p>
+                      <p>
+                        <strong>Категория:</strong>
+                        <br />
+                        {legalCase.category}
+                      </p>
+                      <p>
+                        <strong>Документов:</strong>
+                        <br />
+                        {legalCase.documentsCount}
+                      </p>
+                      <p>
+                        <strong>Рисков:</strong>
+                        <br />
+                        {legalCase.risksCount}
+                      </p>
+                      <p>
+                        <strong>Последнее обновление:</strong>
+                        <br />
+                        {legalCase.updatedAt}
+                      </p>
                     </div>
-                    <div style={{ marginTop: 12 }}>
-                      <button className="btn" type="button" onClick={() => setScreen('overview')}>Открыть дело</button>{' '}
-                      <button className="btn btn-ghost" type="button" onClick={() => setScreen('procedureMap')}>Процессуальная карта</button>{' '}
-                      <button className="btn btn-ghost" type="button" onClick={() => setScreen('documents')}>Документы</button>
+
+                    <div className="mt-5 flex flex-wrap gap-2" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 20 }}>
+                      <button
+                        type="button"
+                        onClick={() => setScreen('overview')}
+                        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+                        style={{ borderRadius: 10, border: 'none', background: '#0f172a', color: '#fff', padding: '8px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        Открыть дело
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setScreen('procedureMap')}
+                        className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
+                        style={{ borderRadius: 10, border: '1px solid #cbd5e1', background: '#fff', color: '#334155', padding: '8px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        Процессуальная карта
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setScreen('documents')}
+                        className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
+                        style={{ borderRadius: 10, border: '1px solid #cbd5e1', background: '#fff', color: '#334155', padding: '8px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        Документы
+                      </button>
                     </div>
-                  </article>
+                  </div>
                 ))}
               </div>
             </div>
