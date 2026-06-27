@@ -5,9 +5,110 @@ const FORM_ENDPOINT = 'https://formspree.io/f/xnjwjzkk'
 const logoSrc = `${import.meta.env.BASE_URL}images/prompt-flow-logo.png`
 const heroImageSrc = `${import.meta.env.BASE_URL}images/hero-abstract.jpg`
 
+type Screen = 'cases' | 'overview' | 'procedure' | 'documents'
+
+type LegalCaseItem = {
+  id: string
+  number: string
+  plaintiff: string
+  defendant: string
+  clientRole: string
+  processType: string
+  category: string
+  status: string
+  documentsCount: number
+  risksCount: number
+  updatedAt: string
+}
+
+const defaultLegalCases: LegalCaseItem[] = [
+  {
+    id: 'a56-95529-2025',
+    number: 'A56-95529/2025',
+    plaintiff: 'ООО «ТЛЦ»',
+    defendant: 'ООО «НафтаТранс»',
+    clientRole: 'ответчик',
+    processType: 'гражданское / арбитражное',
+    category: 'транспортно-экспедиционный спор',
+    status: 'анализ выполнен',
+    documentsCount: 15,
+    risksCount: 5,
+    updatedAt: 'сегодня',
+  },
+]
+
 export function App() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [screen, setScreen] = useState<Screen>('cases')
+  const [legalCases, setLegalCases] = useState<LegalCaseItem[]>(() => {
+    try {
+      const raw = localStorage.getItem('legalCases')
+      if (!raw) return defaultLegalCases
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : defaultLegalCases
+    } catch {
+      return defaultLegalCases
+    }
+  })
+  const [isCreateCaseOpen, setIsCreateCaseOpen] = useState(false)
+  const [newCaseForm, setNewCaseForm] = useState({
+    number: '',
+    plaintiff: '',
+    defendant: '',
+    clientRole: 'ответчик',
+    processType: 'гражданское',
+    category: '',
+  })
+
+  const totalDocuments = legalCases.reduce((sum, legalCase) => sum + legalCase.documentsCount, 0)
+  const totalRisks = legalCases.reduce((sum, legalCase) => sum + legalCase.risksCount, 0)
+  const isCreateCaseHintVisible =
+    !newCaseForm.number.trim() || !newCaseForm.plaintiff.trim() || !newCaseForm.defendant.trim()
+
+  const saveLegalCases = (nextCases: LegalCaseItem[]) => {
+    setLegalCases(nextCases)
+    localStorage.setItem('legalCases', JSON.stringify(nextCases))
+  }
+
+  const handleCreateCase = () => {
+    const number = newCaseForm.number.trim()
+    const plaintiff = newCaseForm.plaintiff.trim()
+    const defendant = newCaseForm.defendant.trim()
+
+    if (!number || !plaintiff || !defendant) {
+      return
+    }
+
+    const id = `case-${Date.now()}`
+
+    const nextCase: LegalCaseItem = {
+      id,
+      number,
+      plaintiff,
+      defendant,
+      clientRole: newCaseForm.clientRole || 'не указана',
+      processType: newCaseForm.processType || 'гражданское',
+      category: newCaseForm.category.trim() || 'категория не указана',
+      status: 'создано',
+      documentsCount: 0,
+      risksCount: 0,
+      updatedAt: 'сегодня',
+    }
+
+    saveLegalCases([nextCase, ...legalCases])
+
+    setNewCaseForm({
+      number: '',
+      plaintiff: '',
+      defendant: '',
+      clientRole: 'ответчик',
+      processType: 'гражданское',
+      category: '',
+    })
+
+    setIsCreateCaseOpen(false)
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -56,6 +157,7 @@ export function App() {
             <span className="brand-text">Prompt Flow</span>
           </div>
           <nav className="nav">
+            <button className="btn btn-small btn-ghost" type="button" onClick={() => setScreen('cases')}>Дела</button>
             <a href="#services-legal">Для юристов</a>
             <a href="#services-business">Для бизнеса</a>
             <a href="#about">О нас</a>
@@ -65,6 +167,66 @@ export function App() {
       </header>
 
       <main>
+        {screen === 'cases' && (
+          <section className="section alt" id="cases">
+            <div className="container">
+              <div className="card">
+                <p className="eyebrow">Дела</p>
+                <h2>Рабочий кабинет по делам</h2>
+                <p>Создавайте дела, фиксируйте процессуальный контекст и переходите к рабочим разделам дела.</p>
+                <div className="grid three">
+                  <article className="card"><h3>{legalCases.length}</h3><p>Всего дел</p></article>
+                  <article className="card"><h3>{totalDocuments}</h3><p>Документов обработано</p></article>
+                  <article className="card"><h3>{totalRisks}</h3><p>Выявлено рисков</p></article>
+                </div>
+                <button className="btn" type="button" onClick={() => setIsCreateCaseOpen(true)}>Создать дело</button>
+              </div>
+
+              {isCreateCaseOpen && (
+                <div className="card" style={{ marginTop: 20 }}>
+                  <h3>Создание нового дела</h3>
+                  <div className="request-form">
+                    <label>Номер дела<input type="text" value={newCaseForm.number} onChange={(event) => setNewCaseForm({ ...newCaseForm, number: event.target.value })} placeholder="A56-00000/2026" /></label>
+                    <label>Истец<input type="text" value={newCaseForm.plaintiff} onChange={(event) => setNewCaseForm({ ...newCaseForm, plaintiff: event.target.value })} placeholder="Наименование истца" /></label>
+                    <label>Ответчик<input type="text" value={newCaseForm.defendant} onChange={(event) => setNewCaseForm({ ...newCaseForm, defendant: event.target.value })} placeholder="Наименование ответчика" /></label>
+                    <label>Роль клиента<input type="text" value={newCaseForm.clientRole} onChange={(event) => setNewCaseForm({ ...newCaseForm, clientRole: event.target.value })} placeholder="ответчик" /></label>
+                    <label>Тип процесса<input type="text" value={newCaseForm.processType} onChange={(event) => setNewCaseForm({ ...newCaseForm, processType: event.target.value })} placeholder="гражданское" /></label>
+                    <label>Категория дела<input type="text" value={newCaseForm.category} onChange={(event) => setNewCaseForm({ ...newCaseForm, category: event.target.value })} placeholder="Категория спора" /></label>
+                    {isCreateCaseHintVisible && <p className="form-message error">Заполните номер дела, истца и ответчика.</p>}
+                    <div>
+                      <button className="btn" type="button" onClick={handleCreateCase}>Создать дело</button>{' '}
+                      <button className="btn btn-ghost" type="button" onClick={() => setIsCreateCaseOpen(false)}>Отмена</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid two" style={{ marginTop: 20 }}>
+                {legalCases.map((legalCase) => (
+                  <article className="card" key={legalCase.id}>
+                    <p className="eyebrow">Статус: {legalCase.status}</p>
+                    <h3>Дело № {legalCase.number}</h3>
+                    <p>{legalCase.plaintiff} против {legalCase.defendant}</p>
+                    <p><strong>Роль клиента:</strong> {legalCase.clientRole}</p>
+                    <p><strong>Тип процесса:</strong> {legalCase.processType}</p>
+                    <p><strong>Категория:</strong> {legalCase.category}</p>
+                    <p><strong>Документов:</strong> {legalCase.documentsCount}</p>
+                    <p><strong>Рисков:</strong> {legalCase.risksCount}</p>
+                    <p><strong>Последнее обновление:</strong> {legalCase.updatedAt}</p>
+                    <button className="btn" type="button" onClick={() => setScreen('overview')}>Открыть дело</button>{' '}
+                    <button className="btn btn-ghost" type="button" onClick={() => setScreen('procedure')}>Процессуальная карта</button>{' '}
+                    <button className="btn btn-ghost" type="button" onClick={() => setScreen('documents')}>Документы</button>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {screen === 'overview' && <section className="section alt"><div className="container card"><h2>Обзор дела</h2><p>Раздел обзора дела открыт.</p><button className="btn btn-ghost" type="button" onClick={() => setScreen('cases')}>Вернуться к делам</button></div></section>}
+        {screen === 'procedure' && <section className="section alt"><div className="container card"><h2>Процессуальная карта</h2><p>Раздел процессуальной карты открыт.</p><button className="btn btn-ghost" type="button" onClick={() => setScreen('cases')}>Вернуться к делам</button></div></section>}
+        {screen === 'documents' && <section className="section alt"><div className="container card"><h2>Документы</h2><p>Раздел документов открыт.</p><button className="btn btn-ghost" type="button" onClick={() => setScreen('cases')}>Вернуться к делам</button></div></section>}
+
         <section className="hero section">
           <div className="container hero-grid">
             <div>
