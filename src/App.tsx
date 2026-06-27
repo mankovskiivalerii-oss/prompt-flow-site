@@ -5,9 +5,9 @@ const FORM_ENDPOINT = 'https://formspree.io/f/xnjwjzkk'
 const logoSrc = `${import.meta.env.BASE_URL}images/prompt-flow-logo.png`
 const heroImageSrc = `${import.meta.env.BASE_URL}images/hero-abstract.jpg`
 
-type Screen = 'cases' | 'overview' | 'procedure' | 'documents'
+type Screen = 'cases' | 'overview' | 'procedureMap' | 'documents'
 
-type LegalCaseItem = {
+type CreatedLegalCaseItem = {
   id: string
   number: string
   plaintiff: string
@@ -21,8 +21,12 @@ type LegalCaseItem = {
   updatedAt: string
 }
 
-const defaultLegalCases: LegalCaseItem[] = [
-  {
+
+export function App() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [screen, setScreen] = useState<Screen>('cases')
+  const pilotLegalCase: CreatedLegalCaseItem = {
     id: 'a56-95529-2025',
     number: 'A56-95529/2025',
     plaintiff: 'ООО «ТЛЦ»',
@@ -34,21 +38,17 @@ const defaultLegalCases: LegalCaseItem[] = [
     documentsCount: 15,
     risksCount: 5,
     updatedAt: 'сегодня',
-  },
-]
-
-export function App() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle')
-  const [screen, setScreen] = useState<Screen>('cases')
-  const [legalCases, setLegalCases] = useState<LegalCaseItem[]>(() => {
+  }
+  const [createdLegalCases, setCreatedLegalCases] = useState<CreatedLegalCaseItem[]>(() => {
     try {
       const raw = localStorage.getItem('legalCases')
-      if (!raw) return defaultLegalCases
+      if (!raw) return []
       const parsed = JSON.parse(raw)
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : defaultLegalCases
+      return Array.isArray(parsed)
+        ? parsed.filter((legalCase) => legalCase?.id !== pilotLegalCase.id)
+        : []
     } catch {
-      return defaultLegalCases
+      return []
     }
   })
   const [isCreateCaseOpen, setIsCreateCaseOpen] = useState(false)
@@ -61,13 +61,13 @@ export function App() {
     category: '',
   })
 
-  const totalDocuments = legalCases.reduce((sum, legalCase) => sum + legalCase.documentsCount, 0)
-  const totalRisks = legalCases.reduce((sum, legalCase) => sum + legalCase.risksCount, 0)
+  const allLegalCases = [...createdLegalCases, pilotLegalCase]
+  const totalCasesCount = allLegalCases.length
   const isCreateCaseHintVisible =
     !newCaseForm.number.trim() || !newCaseForm.plaintiff.trim() || !newCaseForm.defendant.trim()
 
-  const saveLegalCases = (nextCases: LegalCaseItem[]) => {
-    setLegalCases(nextCases)
+  const saveLegalCases = (nextCases: CreatedLegalCaseItem[]) => {
+    setCreatedLegalCases(nextCases)
     localStorage.setItem('legalCases', JSON.stringify(nextCases))
   }
 
@@ -82,7 +82,7 @@ export function App() {
 
     const id = `case-${Date.now()}`
 
-    const nextCase: LegalCaseItem = {
+    const nextCase: CreatedLegalCaseItem = {
       id,
       number,
       plaintiff,
@@ -96,7 +96,7 @@ export function App() {
       updatedAt: 'сегодня',
     }
 
-    saveLegalCases([nextCase, ...legalCases])
+    saveLegalCases([nextCase, ...createdLegalCases])
 
     setNewCaseForm({
       number: '',
@@ -171,14 +171,18 @@ export function App() {
           <section className="section alt" id="cases">
             <div className="container">
               <div className="card">
-                <p className="eyebrow">Дела</p>
-                <h2>Рабочий кабинет по делам</h2>
-                <p>Создавайте дела, фиксируйте процессуальный контекст и переходите к рабочим разделам дела.</p>
-                <div className="grid three">
-                  <article className="card"><h3>{legalCases.length}</h3><p>Всего дел</p></article>
-                  <article className="card"><h3>{totalDocuments}</h3><p>Документов обработано</p></article>
-                  <article className="card"><h3>{totalRisks}</h3><p>Выявлено рисков</p></article>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                  <div>
+                    <p className="eyebrow">Дела</p>
+                    <h2>Дела</h2>
+                    <p>Дело № A56-95529/2025 · Ответчик: ООО «НафтаТранс»</p>
+                  </div>
+                  <div className="card" style={{ flex: '0 1 160px', padding: 12, background: '#f8fafc' }}>
+                    <p className="eyebrow" style={{ marginBottom: 4 }}>Всего дел</p>
+                    <h3 style={{ margin: 0 }}>{totalCasesCount}</h3>
+                  </div>
                 </div>
+                <p>Создавайте дела, фиксируйте процессуальный контекст и переходите к рабочим разделам дела.</p>
                 <button className="btn" type="button" onClick={() => setIsCreateCaseOpen(true)}>Создать дело</button>
               </div>
 
@@ -202,20 +206,28 @@ export function App() {
               )}
 
               <div className="grid two" style={{ marginTop: 20 }}>
-                {legalCases.map((legalCase) => (
+                {allLegalCases.map((legalCase) => (
                   <article className="card" key={legalCase.id}>
-                    <p className="eyebrow">Статус: {legalCase.status}</p>
-                    <h3>Дело № {legalCase.number}</h3>
-                    <p>{legalCase.plaintiff} против {legalCase.defendant}</p>
-                    <p><strong>Роль клиента:</strong> {legalCase.clientRole}</p>
-                    <p><strong>Тип процесса:</strong> {legalCase.processType}</p>
-                    <p><strong>Категория:</strong> {legalCase.category}</p>
-                    <p><strong>Документов:</strong> {legalCase.documentsCount}</p>
-                    <p><strong>Рисков:</strong> {legalCase.risksCount}</p>
-                    <p><strong>Последнее обновление:</strong> {legalCase.updatedAt}</p>
-                    <button className="btn" type="button" onClick={() => setScreen('overview')}>Открыть дело</button>{' '}
-                    <button className="btn btn-ghost" type="button" onClick={() => setScreen('procedure')}>Процессуальная карта</button>{' '}
-                    <button className="btn btn-ghost" type="button" onClick={() => setScreen('documents')}>Документы</button>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12 }}>
+                      <div>
+                        <h3>Дело № {legalCase.number}</h3>
+                        <p>{legalCase.plaintiff} против {legalCase.defendant}</p>
+                        <p><strong>Роль клиента:</strong> {legalCase.clientRole}</p>
+                      </div>
+                      <p className="eyebrow">Статус: {legalCase.status}</p>
+                    </div>
+                    <div className="grid two" style={{ marginTop: 12 }}>
+                      <p><strong>Тип процесса:</strong> {legalCase.processType}</p>
+                      <p><strong>Категория:</strong> {legalCase.category}</p>
+                      <p><strong>Документов:</strong> {legalCase.documentsCount}</p>
+                      <p><strong>Рисков:</strong> {legalCase.risksCount}</p>
+                      <p><strong>Последнее обновление:</strong> {legalCase.updatedAt}</p>
+                    </div>
+                    <div style={{ marginTop: 12 }}>
+                      <button className="btn" type="button" onClick={() => setScreen('overview')}>Открыть дело</button>{' '}
+                      <button className="btn btn-ghost" type="button" onClick={() => setScreen('procedureMap')}>Процессуальная карта</button>{' '}
+                      <button className="btn btn-ghost" type="button" onClick={() => setScreen('documents')}>Документы</button>
+                    </div>
                   </article>
                 ))}
               </div>
@@ -224,7 +236,7 @@ export function App() {
         )}
 
         {screen === 'overview' && <section className="section alt"><div className="container card"><h2>Обзор дела</h2><p>Раздел обзора дела открыт.</p><button className="btn btn-ghost" type="button" onClick={() => setScreen('cases')}>Вернуться к делам</button></div></section>}
-        {screen === 'procedure' && <section className="section alt"><div className="container card"><h2>Процессуальная карта</h2><p>Раздел процессуальной карты открыт.</p><button className="btn btn-ghost" type="button" onClick={() => setScreen('cases')}>Вернуться к делам</button></div></section>}
+        {screen === 'procedureMap' && <section className="section alt"><div className="container card"><h2>Процессуальная карта</h2><p>Раздел процессуальной карты открыт.</p><button className="btn btn-ghost" type="button" onClick={() => setScreen('cases')}>Вернуться к делам</button></div></section>}
         {screen === 'documents' && <section className="section alt"><div className="container card"><h2>Документы</h2><p>Раздел документов открыт.</p><button className="btn btn-ghost" type="button" onClick={() => setScreen('cases')}>Вернуться к делам</button></div></section>}
 
         <section className="hero section">
